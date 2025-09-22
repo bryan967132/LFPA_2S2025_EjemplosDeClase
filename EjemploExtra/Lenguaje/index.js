@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
         indentUnit: 4,
         tabSize: 4,
         scrollbarStyle: "native",
-        value: `TORNEO {
+    });
+
+    editor.setOption('value', `TORNEO {
   nombre: "Mega Copa Universitaria",
   equipos: 4,
   sede: "El Salvador"
@@ -39,7 +41,7 @@ EQUIPOS {
     jugador: "Luis Ramírez" [posicion: "MEDIOCAMPO", numero: 6, edad: 22]
   ]
 }
-
+@
 ELIMINACION {
   cuartos: [
     partido: "Leones Dorados" vs "Tiburones Azules" [
@@ -64,8 +66,7 @@ ELIMINACION {
   semifinal: [
     partido: "Leones Dorados" vs "Águilas Negras" [resultado: "Pendiente"]
   ]
-}`
-    });
+}`)
 
     setTimeout(() => {
         editor.refresh();
@@ -117,16 +118,42 @@ function analizarTorneo() {
         }
 
         // EJEMPLO PARA TABLA DE TOKENS
-        document.getElementById('infoTable').innerHTML = `
-        <thead>
-            <tr>
-                <th>Lexema</th>
-                <th>Tipo</th>
-                <th>Línea</th>
-                <th>Columna</th>
-            </tr>
-        </thead>
-        <tbody>${tableBody}</tbody>`;
+        document.getElementById('infoTable').innerHTML += `
+        <div class="table-title">Tokens</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Lexema</th>
+                    <th>Tipo</th>
+                    <th>Línea</th>
+                    <th>Columna</th>
+                </tr>
+            </thead>
+            <tbody>${tableBody}</tbody>
+        </table>`;
+
+        tableBody = ''
+
+        for(let i = 0; i < scanner.errors.length; i ++) {
+            tableBody += `<tr>
+            <td>${scanner.errors[i].description}</td>
+            <td>${scanner.errors[i].line}</td>
+            <td>${scanner.errors[i].column}</td>
+            </tr>`
+        }
+
+        document.getElementById('infoTable').innerHTML += `
+        <div class="table-title">Errores</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Descripcion</th>
+                    <th>Línea</th>
+                    <th>Columna</th>
+                </tr>
+            </thead>
+            <tbody>${tableBody}</tbody>
+        </table>`;
     }
 }
 

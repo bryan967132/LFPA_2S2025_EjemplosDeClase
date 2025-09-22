@@ -6,6 +6,13 @@
  * @property {number} column - Columna donde se encontró el token.
  */
 
+/**
+ * @typedef {Object} Error
+ * @property {string} description - Descripción del error.
+ * @property {number} line - Línea donde se encontró el error.
+ * @property {number} column - Columna donde se encontró el error.
+ */
+
 class Scanner {
     /** @type {string} */
     #input;
@@ -19,10 +26,10 @@ class Scanner {
     #char_col;
     /** @type {string} */
     #next_char;
-    /** @type {boolean} */
-    #is_look_ahead;
     /** @type {Object.<string,string>} */
     #keywords;
+    /** @type {Error[]} */
+    errors;
 
     /**
      * @param {string} input - Texto de entrada a analizar.
@@ -38,8 +45,8 @@ class Scanner {
             TORNEO: 'KW_torneo',
             EQUIPOS: 'KW_equipos',
             equipo: 'KW_equipo',
-            PORTERO: 'KW_portero',
-        }
+        };
+        this.errors = [];
     }
 
     /**
@@ -109,6 +116,11 @@ class Scanner {
                 return this.#S9();
             }
 
+            if(this.#next_char.charCodeAt(0) >= 48 && this.#next_char.charCodeAt(0) <= 57) {
+                this.#initBuffer(this.#next_char);
+                return this.#S10();
+            }
+
             // CARACTERES IGNORADOS
             if(this.#next_char === ' ') {
                 this.#char_col ++;
@@ -124,6 +136,7 @@ class Scanner {
             else {
                 this.#char_col ++;
                 console.log(`Error Léxico: Símbolo no reconocido '${this.#next_char}'. [${this.#char_line}:${this.#char_col}]`);
+                this.errors.push({description: `Error Léxico: Símbolo no reconocido '${this.#next_char}'`, line: this.#char_line, column: this.#char_col});
             }
 
             this.#pos_char ++;
@@ -184,6 +197,15 @@ class Scanner {
 
     #S9() {
         return { lexeme: this.#buffer, type: 'TK_colon', line: this.#char_line, column: this.#char_col }; // Cadena
+    }
+
+    #S10() {
+        this.#next_char = this.#input[this.#pos_char]
+        if(this.#next_char.charCodeAt(0) >= 48 && this.#next_char.charCodeAt(0) <= 57) {
+            this.#addBuffer(this.#next_char);
+            return this.#S10();
+        }
+        return { lexeme: this.#buffer, type: 'TK_number', line: this.#char_line, column: this.#char_col }; // Cadena
     }
 
     next_token = () => this.#S0();
