@@ -95,14 +95,45 @@ function analizarTorneo() {
     const scanner = new Scanner(editor.getValue());
     
     let token = scanner.next_token();
+
+    let tokens = []
+
     while(token.type !== 'EOF') {
-        console.log(token);
+        tokens.push(token);
+
         token = scanner.next_token();
     }
+
+    if(tokens.length > 0) {
+        let tableBody = ''
+
+        for(let i = 0; i < tokens.length; i ++) {
+            tableBody += `<tr>
+            <td>${tokens[i].lexeme}</td>
+            <td>${tokens[i].type}</td>
+            <td>${tokens[i].line}</td>
+            <td>${tokens[i].column}</td>
+            </tr>`
+        }
+
+        // EJEMPLO PARA TABLA DE TOKENS
+        document.getElementById('infoTable').innerHTML = `
+        <thead>
+            <tr>
+                <th>Lexema</th>
+                <th>Tipo</th>
+                <th>Línea</th>
+                <th>Columna</th>
+            </tr>
+        </thead>
+        <tbody>${tableBody}</tbody>`;
+    }
 }
+
 function generarReporte() {
 
 }
+
 function mostrarBracket() {
 
 }
