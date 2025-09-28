@@ -16,56 +16,56 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     editor.setOption('value', `TORNEO {
-  nombre: "Mega Copa Universitaria",
-  equipos: 4,
-  sede: "El Salvador"
+    nombre: "Mega Copa Universitaria",
+    equipos: 4,
+    sede: "El Salvador"
 }
 
 EQUIPOS {
-  equipo: "Leones Dorados" [
-    jugador: "Daniel Pérez" [posicion: "DELANTERO", numero: 9, edad: 23],
-    jugador: "Roberto López" [posicion: "MEDIOCAMPO", numero: 8, edad: 22],
-    jugador: "Santiago Ramírez" [posicion: "DEFENSA", numero: 4, edad: 25],
-    jugador: "Manuel Torres" [posicion: "PORTERO", numero: 1, edad: 29]
-  ],
-  equipo: "Tiburones Azules" [
-    jugador: "Cristian Morales" [posicion: "DELANTERO", numero: 11, edad: 26],
-    jugador: "Alejandro Ruiz" [posicion: "DEFENSA", numero: 3, edad: 28]
-  ],
-  equipo: "Águilas Negras" [
-    jugador: "Javier Gómez" [posicion: "DELANTERO", numero: 7, edad: 24],
-    jugador: "Felipe Díaz" [posicion: "PORTERO", numero: 12, edad: 27]
-  ],
-  equipo: "Pumas Blancos" [
-    jugador: "Oscar Hernández" [posicion: "DELANTERO", numero: 10, edad: 20],
-    jugador: "Luis Ramírez" [posicion: "MEDIOCAMPO", numero: 6, edad: 22]
-  ]
+    equipo: "Leones Dorados" [
+        jugador: "Daniel Pérez" [posicion: "DELANTERO", numero: 9, edad: 23],
+        jugador: "Roberto López" [posicion: "MEDIOCAMPO", numero: 8, edad: 22],
+        jugador: "Santiago Ramírez" [posicion: "DEFENSA", numero: 4, edad: 25],
+        jugador: "Manuel Torres" [posicion: "PORTERO", numero: 1, edad: 29]
+    ],
+    equipo: "Tiburones Azules" [
+        jugador: "Cristian Morales" [posicion: "DELANTERO", numero: 11, edad: 26],
+        jugador: "Alejandro Ruiz" [posicion: "DEFENSA", numero: 3, edad: 28]
+    ],
+    equipo: "Águilas Negras" [
+        jugador: "Javier Gómez" [posicion: "DELANTERO", numero: 7, edad: 24],
+        jugador: "Felipe Díaz" [posicion: "PORTERO", numero: 12, edad: 27]
+    ],
+    equipo: "Pumas Blancos" [
+        jugador: "Oscar Hernández" [posicion: "DELANTERO", numero: 10, edad: 20],
+        jugador: "Luis Ramírez" [posicion: "MEDIOCAMPO", numero: 6, edad: 22]
+    ]
 }
 @
 ELIMINACION {
-  cuartos: [
-    partido: "Leones Dorados" vs "Tiburones Azules" [
-      resultado: "2-2",
-      goleadores: [
-        goleador: "Cristian Morales" [minuto: 12],
-        goleador: "Daniel Pérez" [minuto: 30],
-        goleador: "Alejandro Ruiz" [minuto: 60],
-        goleador: "Roberto López" [minuto: 78]
-      ]
+    cuartos: [
+        partido: "Leones Dorados" vs "Tiburones Azules" [
+            resultado: "2-2",
+            goleadores: [
+                goleador: "Cristian Morales" [minuto: 12],
+                goleador: "Daniel Pérez" [minuto: 30],
+                goleador: "Alejandro Ruiz" [minuto: 60],
+                goleador: "Roberto López" [minuto: 78]
+            ]
+        ],
+        partido: "Águilas Negras" vs "Pumas Blancos" [
+            resultado: "3-1",
+            goleadores: [
+                goleador: "Javier Gómez" [minuto: 15],
+                goleador: "Oscar Hernández" [minuto: 43],
+                goleador: "Felipe Díaz" [minuto: 55],
+                goleador: "Javier Gómez" [minuto: 88]
+            ]
+        ]
     ],
-    partido: "Águilas Negras" vs "Pumas Blancos" [
-      resultado: "3-1",
-      goleadores: [
-        goleador: "Javier Gómez" [minuto: 15],
-        goleador: "Oscar Hernández" [minuto: 43],
-        goleador: "Felipe Díaz" [minuto: 55],
-        goleador: "Javier Gómez" [minuto: 88]
-      ]
+    semifinal: [
+        partido: "Leones Dorados" vs "Águilas Negras" [resultado: "Pendiente"]
     ]
-  ],
-  semifinal: [
-    partido: "Leones Dorados" vs "Águilas Negras" [resultado: "Pendiente"]
-  ]
 }`)
 
     setTimeout(() => {
@@ -118,7 +118,7 @@ function analizarTorneo() {
         }
 
         // EJEMPLO PARA TABLA DE TOKENS
-        document.getElementById('infoTable').innerHTML += `
+        document.getElementById('infoTable').innerHTML = `
         <div class="table-title">Tokens</div>
         <table class="data-table">
             <thead>
