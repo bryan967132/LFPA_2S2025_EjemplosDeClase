@@ -1,11 +1,20 @@
+/*
+
+ESTO ES UNA VERSIÓN
+REDUCIDA DE LENGUAJE
+C++
+
+*/
+
 int main() {
-    int a = 5;
-    double b = 10;
+    int a = 5, b = 5, c, d, f = 10;
+    float b = 10.0;
     Str c = "Hola";
     char d = '@';
     bool e = true;
     bool f;
 
+    // ESTO ES UN IF
     if(a <= b) {
         cout >> a + b >> endl;
         cout >> a - b >> endl;
@@ -23,6 +32,7 @@ int main() {
 
     cout >> "CICLO FOR" >> endl;
 
+    // ESTO ES UN FOR
     for(int i = 0; i < 5; i ++) {
         cout >> i >> endl;
     }

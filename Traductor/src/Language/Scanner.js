@@ -41,15 +41,18 @@ export default class Scanner {
         this.#keywords = {
             main: 'KW_main',
             int: 'KW_int',
-            double: 'KW_double',
+            float: 'KW_float',
             Str: 'KW_Str',
             char: 'KW_char',
             bool: 'KW_bool',
             if: 'KW_if',
+            else: 'KW_else',
             for: 'KW_for',
             while: 'KW_while',
             cout: 'KW_cout',
             endl: 'KW_endl',
+            true: 'KW_true',
+            false: 'KW_false',
         };
     }
 
@@ -89,110 +92,116 @@ export default class Scanner {
      */
     #S0() {
         while((this.#next_char = this.#input[this.#pos_char]) !== '\0') {
-            // δ(\c, S0) = S1, si c ∈ {A-Z, a-z}
+            // TK_id | RW_[KEYWORD]
             if(Character.isAlpha(this.#next_char)) {
                 this.#initBuffer(this.#next_char);
                 return this.#S1();
             }
 
-            // δ(", S0) = S2
+            // TK_str
             if(this.#next_char === '"') {
                 this.#initBuffer(this.#next_char);
                 return this.#S2();
             }
 
-            // δ(', S0) = S25
+            // TK_char
             if(this.#next_char === '\'') {
                 this.#initBuffer(this.#next_char);
-                return this.#S25();
+                return this.#S4();
             }
 
-            // δ(\d, S0) = S4, si d ∈ {0-9}
+            // TK_int | TK_float
             if(Character.isDigit(this.#next_char)) {
                 this.#initBuffer(this.#next_char);
                 /** @type {Token} */
                 let tmpToken;
-                if((tmpToken = this.#S4())) return tmpToken;
+                if((tmpToken = this.#S7())) return tmpToken;
             }
 
-            // δ(>, S0) = S7
+            // >= | >> | >
             if(this.#next_char === '>') {
-                this.#initBuffer(this.#next_char);
-                return this.#S7();
-            }
-
-            // δ(<, S0) = S20
-            if(this.#next_char === '<') {
-                this.#initBuffer(this.#next_char);
-                return this.#S20();
-            }
-
-            // δ(=, S0) = S9
-            if(this.#next_char === '=') {
-                this.#initBuffer(this.#next_char);
-                return this.#S9();
-            }
-
-            // δ(+, S0) = S10
-            if(this.#next_char === '+') {
                 this.#initBuffer(this.#next_char);
                 return this.#S10();
             }
 
-            // δ(-, S0) = S11
-            if(this.#next_char === '-') {
-                this.#initBuffer(this.#next_char);
-                return this.#S11();
-            }
-
-            // δ(*, S0) = S12
-            if(this.#next_char === '*') {
-                this.#initBuffer(this.#next_char);
-                return this.#S12();
-            }
-
-            // δ(/, S0) = S13
-            if(this.#next_char === '/') {
+            // <= | <
+            if(this.#next_char === '<') {
                 this.#initBuffer(this.#next_char);
                 return this.#S13();
             }
 
-            // δ(;, S0) = S14
-            if(this.#next_char === ';') {
-                this.#initBuffer(this.#next_char);
-                return this.#S14();
-            }
-
-            // δ((, S0) = S15
-            if(this.#next_char === '(') {
+            // == | =
+            if(this.#next_char === '=') {
                 this.#initBuffer(this.#next_char);
                 return this.#S15();
             }
 
-            // δ(), S0) = S16
-            if(this.#next_char === ')') {
-                this.#initBuffer(this.#next_char);
-                return this.#S16();
-            }
-
-            // δ({, S0) = S17
-            if(this.#next_char === '{') {
-                this.#initBuffer(this.#next_char);
-                return this.#S17();
-            }
-
-            // δ(}, S0) = S18
-            if(this.#next_char === '}') {
-                this.#initBuffer(this.#next_char);
-                return this.#S18();
-            }
-
-            // δ(!, S0) = S23
+            // !=
             if(this.#next_char === '!') {
                 this.#initBuffer(this.#next_char);
                 /** @type {Token} */
                 let tmpToken;
-                if((tmpToken = this.#S23())) return tmpToken;
+                if((tmpToken = this.#S17())) return tmpToken;
+            }
+
+            // ++ | +
+            if(this.#next_char === '+') {
+                this.#initBuffer(this.#next_char);
+                return this.#S19();
+            }
+
+            // ++ | +
+            if(this.#next_char === '-') {
+                this.#initBuffer(this.#next_char);
+                return this.#S21();
+            }
+
+            // *
+            if(this.#next_char === '*') {
+                this.#initBuffer(this.#next_char);
+                return this.#S23();
+            }
+
+            // [/][*][^*]*[*]+([^/*][^*]*[*]+)*[/] | [/][/][^\n]* | /
+            if(this.#next_char === '/') {
+                this.#initBuffer(this.#next_char);
+                return this.#S24();
+            }
+
+            // (
+            if(this.#next_char === '(') {
+                this.#initBuffer(this.#next_char);
+                return this.#S29();
+            }
+
+            // )
+            if(this.#next_char === ')') {
+                this.#initBuffer(this.#next_char);
+                return this.#S30();
+            }
+
+            // {
+            if(this.#next_char === '{') {
+                this.#initBuffer(this.#next_char);
+                return this.#S31();
+            }
+
+            // }
+            if(this.#next_char === '}') {
+                this.#initBuffer(this.#next_char);
+                return this.#S32();
+            }
+
+            // ;
+            if(this.#next_char === ';') {
+                this.#initBuffer(this.#next_char);
+                return this.#S33();
+            }
+
+            // ,
+            if(this.#next_char === ',') {
+                this.#initBuffer(this.#next_char);
+                return this.#S34();
             }
 
             // CARACTERES IGNORADOS
@@ -224,7 +233,6 @@ export default class Scanner {
      * @returns {Token} Token reconocido.
      */
     #S1() {
-        // δ(\a, S1) = S1, si c ∈ {A-Z, a-z, 0-9}
         if(Character.isAlphaNumeric((this.#next_char = this.#input[this.#pos_char]))) {
             this.#addBuffer(this.#next_char);
             return this.#S1();
@@ -238,13 +246,11 @@ export default class Scanner {
      * @returns {Token} Token reconocido.
      */
     #S2() {
-        // δ(\a, S2) = S2, si a ∉ {", \n}
         if((this.#next_char = this.#input[this.#pos_char]) !== '"' && this.#next_char !== '\n') {
             this.#addBuffer(this.#next_char);
             return this.#S2();
         }
 
-        // δ(", S2) = S3
         this.#addBuffer(this.#next_char);
         return this.#S3();
     }
@@ -257,31 +263,24 @@ export default class Scanner {
     }
 
     /**
-     * @returns {Token} Token reconocido.
+     * @returns {Token} Token reconocido. '
      */
     #S4() {
-        // δ(\d, S4) = S4, si d ∈ {0-9}
-        if(Character.isDigit((this.#next_char = this.#input[this.#pos_char]))) {
-            this.#addBuffer(this.#next_char);
-            return this.#S4();
-        }
-
-        // δ(\., S4) = S5
-        if(this.#next_char === '.') {
+        if((this.#next_char = this.#input[this.#pos_char]) !== '\'' && this.#next_char !== '\n') {
             this.#addBuffer(this.#next_char);
             return this.#S5();
         }
 
-        // Retorna el token reconocido
-        return { lexeme: this.#buffer, type: 'TK_int', line: this.#char_line, column: this.#char_col };
+        // ERROR LÉXICO
+        errors.push({ type: 'Lexical', message: `Patrón no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
+        return null;
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S5() {
-        // δ(\d, S5) = S6, si d ∈ {0-9}
-        if(Character.isDigit((this.#next_char = this.#input[this.#pos_char]))) {
+        if((this.#next_char = this.#input[this.#pos_char]) === '\'') {
             this.#addBuffer(this.#next_char);
             return this.#S6();
         }
@@ -295,50 +294,83 @@ export default class Scanner {
      * @returns {Token} Token reconocido.
      */
     #S6() {
-        // δ(\d, S6) = S6, si d ∈ {0-9}
+        return { lexeme: this.#buffer.substring(1, this.#buffer.length - 1), type: 'TK_char', line: this.#char_line, column: this.#char_col }; // Cadena
+    }
+
+    #S7() {
         if(Character.isDigit((this.#next_char = this.#input[this.#pos_char]))) {
             this.#addBuffer(this.#next_char);
-            return this.#S6();
+            return this.#S7();
+        }
+
+        if(this.#next_char === '.') {
+            this.#addBuffer(this.#next_char);
+            return this.#S8();
+        }
+
+        // Retorna el token reconocido
+        return { lexeme: this.#buffer, type: 'TK_int', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S8() {
+        if(Character.isDigit((this.#next_char = this.#input[this.#pos_char]))) {
+            this.#addBuffer(this.#next_char);
+            return this.#S9();
+        }
+
+        // ERROR LÉXICO
+        errors.push({ type: 'Lexical', message: `Patrón no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
+        return null;
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S9() {
+        if(Character.isDigit((this.#next_char = this.#input[this.#pos_char]))) {
+            this.#addBuffer(this.#next_char);
+            return this.#S9();
         }
 
         // Retorna el token reconocido
         return { lexeme: this.#buffer, type: 'TK_float', line: this.#char_line, column: this.#char_col };
     }
 
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S7() {
-        // δ(>, S7) = S8
+    #S10() {
         if((this.#next_char = this.#input[this.#pos_char]) === '>') {
             this.#addBuffer(this.#next_char);
-            return this.#S8();
+            return this.#S11();
         }
 
-        // δ(=, S7) = S19
         if((this.#next_char = this.#input[this.#pos_char]) === '=') {
             this.#addBuffer(this.#next_char);
-            return this.#S19();
+            return this.#S12();
         }
 
         return { lexeme: this.#buffer, type: 'TK_greater', line: this.#char_line, column: this.#char_col };
     }
 
+    #S11() {
+        return { lexeme: this.#buffer, type: 'TK_arrow', line: this.#char_line, column: this.#char_col };
+    }
+
     /**
      * @returns {Token} Token reconocido.
      */
-    #S19() {
+    #S12() {
         return { lexeme: this.#buffer, type: 'TK_grtequal', line: this.#char_line, column: this.#char_col };
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
-    #S20() {
-        // δ(=, S7) = S8
+    #S13() {
         if((this.#next_char = this.#input[this.#pos_char]) === '=') {
             this.#addBuffer(this.#next_char);
-            return this.#S21();
+            return this.#S14();
         }
 
         return { lexeme: this.#buffer, type: 'TK_less', line: this.#char_line, column: this.#char_col };
@@ -347,25 +379,17 @@ export default class Scanner {
     /**
      * @returns {Token} Token reconocido.
      */
-    #S21() {
+    #S14() {
         return { lexeme: this.#buffer, type: 'TK_lsequal', line: this.#char_line, column: this.#char_col };
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
-    #S8() {
-        return { lexeme: this.#buffer, type: 'TK_arrow', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S9() {
-        // δ(=, S9) = S8
+    #S15() {
         if((this.#next_char = this.#input[this.#pos_char]) === '=') {
             this.#addBuffer(this.#next_char);
-            return this.#S22();
+            return this.#S16();
         }
 
         return { lexeme: this.#buffer, type: 'TK_assign', line: this.#char_line, column: this.#char_col };
@@ -374,132 +398,185 @@ export default class Scanner {
     /**
      * @returns {Token} Token reconocido.
      */
-    #S22() {
+    #S16() {
         return { lexeme: this.#buffer, type: 'TK_equal', line: this.#char_line, column: this.#char_col };
     }
 
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S10() {
-        return { lexeme: this.#buffer, type: 'TK_add', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S11() {
-        return { lexeme: this.#buffer, type: 'TK_sub', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S12() {
-        return { lexeme: this.#buffer, type: 'TK_mul', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S13() {
-        return { lexeme: this.#buffer, type: 'TK_div', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S14() {
-        return { lexeme: this.#buffer, type: 'TK_semicolon', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S15() {
-        return { lexeme: this.#buffer, type: 'TK_lpar', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
-    #S16() {
-        return { lexeme: this.#buffer, type: 'TK_rpar', line: this.#char_line, column: this.#char_col };
-    }
-
-    /**
-     * @returns {Token} Token reconocido.
-     */
     #S17() {
-        return { lexeme: this.#buffer, type: 'TK_lbrc', line: this.#char_line, column: this.#char_col };
+        if((this.#next_char = this.#input[this.#pos_char]) === '=') {
+            this.#addBuffer(this.#next_char);
+            return this.#S18();
+        }
+
+        // ERROR LÉXICO
+        errors.push({ type: 'Lexical', message: `Caracter no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
+        return null;
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S18() {
-        return { lexeme: this.#buffer, type: 'TK_rbrc', line: this.#char_line, column: this.#char_col };
+        return { lexeme: this.#buffer, type: 'TK_notequal', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S19() {
+        if((this.#next_char = this.#input[this.#pos_char]) === '+') {
+            this.#addBuffer(this.#next_char);
+            return this.#S20();
+        }
+
+        return { lexeme: this.#buffer, type: 'TK_add', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S20() {
+        return { lexeme: this.#buffer, type: 'TK_inc', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S21() {
+        if((this.#next_char = this.#input[this.#pos_char]) === '-') {
+            this.#addBuffer(this.#next_char);
+            return this.#S22();
+        }
+
+        return { lexeme: this.#buffer, type: 'TK_sub', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S22() {
+        return { lexeme: this.#buffer, type: 'TK_dec', line: this.#char_line, column: this.#char_col };
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S23() {
-        // δ(=, S9) = S8
-        if((this.#next_char = this.#input[this.#pos_char]) === '=') {
-            this.#addBuffer(this.#next_char);
-            return this.#S24();
-        }
-
-        // ERROR LÉXICO
-        errors.push({ type: 'Lexical', message: `Patrón no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
-        return null;
+        return { lexeme: this.#buffer, type: 'TK_mul', line: this.#char_line, column: this.#char_col };
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S24() {
-        return { lexeme: this.#buffer, type: 'TK_notequal', line: this.#char_line, column: this.#char_col };
-    }
-
-    // ' -> c -> '
-
-    /**
-     * @returns {Token} Token reconocido. '
-     */
-    #S25() {
-        // δ(\a, S2) = S2, si a ∉ {", \n}
-        if((this.#next_char = this.#input[this.#pos_char]) !== '\'' && this.#next_char !== '\n') {
+        if((this.#next_char = this.#input[this.#pos_char]) === '*') {
             this.#addBuffer(this.#next_char);
-            return this.#S26();
+            return this.#S25();
         }
 
-        // ERROR LÉXICO
-        errors.push({ type: 'Lexical', message: `Patrón no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
-        return null;
+        if((this.#next_char = this.#input[this.#pos_char]) === '/') {
+            this.#addBuffer(this.#next_char);
+            return this.#S28();
+        }
+
+        return { lexeme: this.#buffer, type: 'TK_div', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S25() {
+        if((this.#next_char = this.#input[this.#pos_char]) !== '*') {
+            this.#addBuffer(this.#next_char);
+            if(this.#next_char === '\n') {
+                this.#char_col = 1;
+                this.#char_line ++;
+            }
+            return this.#S25();
+        }
+
+        this.#addBuffer(this.#next_char);
+        return this.#S26();
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S26() {
-        // δ(\a, S2) = S2, si a ∉ {", \n}
-        if((this.#next_char = this.#input[this.#pos_char]) === '\'') {
+        if((this.#next_char = this.#input[this.#pos_char]) !== '/') {
             this.#addBuffer(this.#next_char);
-            return this.#S27();
+            if(this.#next_char === '\n') {
+                this.#char_col = 1;
+                this.#char_line ++;
+            }
+            return this.#S25();
         }
 
-        // ERROR LÉXICO
-        errors.push({ type: 'Lexical', message: `Patrón no reconocido «${this.#buffer}».`, line: this.#char_line, column: this.#char_col });
-        return null;
+        this.#addBuffer(this.#next_char);
+        return this.#S27();
     }
 
     /**
      * @returns {Token} Token reconocido.
      */
     #S27() {
-        return { lexeme: this.#buffer.substring(1, this.#buffer.length - 1), type: 'TK_char', line: this.#char_line, column: this.#char_col }; // Cadena
+        return { lexeme: this.#buffer, type: 'TK_comment', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S28() {
+        if((this.#next_char = this.#input[this.#pos_char]) !== '\n') {
+            this.#addBuffer(this.#next_char);
+            return this.#S28();
+        }
+
+        this.#char_line ++;
+        this.#char_col = 1;
+        return { lexeme: this.#buffer, type: 'TK_single_comment', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S29() {
+        return { lexeme: this.#buffer, type: 'TK_lpar', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S30() {
+        return { lexeme: this.#buffer, type: 'TK_rpar', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S31() {
+        return { lexeme: this.#buffer, type: 'TK_lbrc', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S32() {
+        return { lexeme: this.#buffer, type: 'TK_rbrc', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S33() {
+        return { lexeme: this.#buffer, type: 'TK_semicolon', line: this.#char_line, column: this.#char_col };
+    }
+
+    /**
+     * @returns {Token} Token reconocido.
+     */
+    #S34() {
+        return { lexeme: this.#buffer, type: 'TK_comma', line: this.#char_line, column: this.#char_col };
     }
 
     /**
