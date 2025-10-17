@@ -53,6 +53,7 @@ export default class Scanner {
             endl: 'KW_endl',
             true: 'KW_true',
             false: 'KW_false',
+            return: 'KW_return',
         };
     }
 

@@ -34,6 +34,7 @@
     * `>`: `TK_greater`
     * `=`: `TK_assign`
     * `;`: `TK_semicolon`
+    * `,`: `TK_comma`
     * `++`: `TK_inc`
     * `--`: `TK_dec`
     * `+`: `TK_add`
@@ -79,6 +80,9 @@
 | `>`                    | `TK_greater`   |
 | `=`                    | `TK_assign`    |
 | `;`                    | `TK_semicolon` |
+| `,`                    | `TK_comma` |
+| `++`                   | `TK_inc`       |
+| `--`                   | `TK_dec`       |
 | `+`                    | `TK_add`       |
 | `-`                    | `TK_sub`       |
 | `*`                    | `TK_mul`       |
@@ -98,7 +102,23 @@
 ## Gramática Libre del Contexto
 
 ```html
-<MAINFUNCTION> ::= 'int' 'main' '(' ')' '{' <INSTRUCTION>* 'return' TK_int '}'
+<START> ::= <MAINFUNCTION> <EOF>
+
+<MAINFUNCTION> ::= 'int' 'main' '(' ')' '{' <INSTRUCTION>* 'return' TK_int ';' '}'
+
+<INITVAR> ::= <TYPE> TK_id ('=' <EXP>)? (',' TK_id ('=' <EXP>)?)* ';'
+
+<ASSIGNVAR> ::= TK_id '=' <EXP> ';'
+
+<IF> ::= 'if' '(' <EXP> ')' <BLOCK> ('else' <BLOCK>)?
+
+<FOR> ::= 'for' '(' <TYPE> TK_id '=' <EXP> ';' <EXP> ';' <INCDEC> ')' <BLOCK>
+
+<INCDEC> ::= TK_id ('++' | '--')
+
+<WHILE> ::= 'while' '(' <EXP> ')' <BLOCK>
+
+<BLOCK> ::= '{' <INSTRUCTION>* '}'
 
 <INSTRUCTION> ::=
     <INITIVAR>  |
@@ -108,52 +128,27 @@
     <WHILE>     |
     <PRINT>
 
-<INITVAR> ::=
-    <TYPE> TK_id ('=' <EXP>)? (',' TK_id ('=' <EXP>)?)* ';'
-
-<ASSIGNVAR> ::=
-    TK_id '=' <EXP> ';'
-
-<IF> ::=
-    'if' '(' <EXP> ')' <BLOCK> ('else' <BLOCK>)?
-
-<FOR> ::=
-    'for' '(' <TYPE> TK_id '=' <EXP> ';' <EXP> ';' <INCDEC> ')' <BLOCK>
-
-<INCDEC> ::=
-    TK_id ('++' | '--')
-
-<WHILE> ::=
-    'while' '(' <EXP> ')' <BLOCK>
-
-<BLOCK> ::=
-    '{' <INSTRUCTION>* '}'
-
-<PRINT> ::=
-    'cout' '>>' <EXP> '>>' 'endl' ';'
+<PRINT> ::= 'cout' '>>' <EXP> '>>' 'endl' ';'
 
 <TYPE> ::=
-    'int'    |
-    'double' |
-    'Str'    |
-    'char'   |
+    'int'   |
+    'float' |
+    'Str'   |
+    'char'  |
     'bool'
 
-<EXP> ::=
-    <EXP2> (('==' | '!=' | '<=' | '>=' | '<' | '>') <EXP2>)*
+<EXP> ::= <EXP2> (('==' | '!=' | '<=' | '>=' | '<' | '>') <EXP2>)*
 
-<EXP2> ::=
-    <EXP1> (('+' | '-') <EXP1>)*
+<EXP2> ::= <EXP1> (('+' | '-') <EXP1>)*
 
-<EXP1> ::=
-    <PRIMITIVE> (('*' | '/') <PRIMITIVE>)*
+<EXP1> ::= <PRIMITIVE> (('*' | '/') <PRIMITIVE>)*
 
 <PRIMITIVE> ::=
-    TK_id     |
-    TK_int    |
-    TK_double |
-    TK_str    |
-    TK_char   |
-    'true'    |
+    TK_id    |
+    TK_int   |
+    TK_float |
+    TK_str   |
+    TK_char  |
+    'true'   |
     'false'
 ```
