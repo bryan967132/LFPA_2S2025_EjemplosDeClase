@@ -351,9 +351,9 @@ export default class Parser {
             return {
                 line: p.line,
                 column: p.column,
-                traducir: () => {
-                    let value = v.traducir();
-                    return {value: `(${value})`, type: value.type};
+                traducir: (env, gen) => {
+                    let value = v.traducir(env, gen);
+                    return {value: `(${value.value})`, type: value.type};
                 }
             };
         }

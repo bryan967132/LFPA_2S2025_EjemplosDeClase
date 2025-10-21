@@ -15,7 +15,7 @@ func main() {
 	var j bool = false
 	fmt.Println(a + b)
 	fmt.Println(a - b)
-	fmt.Println(a * b)
+	fmt.Println(a * (b + 52))
 	fmt.Println(a / b)
 	fmt.Println(a >= b)
 	fmt.Println(a <= b)
