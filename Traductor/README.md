@@ -150,5 +150,6 @@
     TK_str   |
     TK_char  |
     'true'   |
-    'false'
+    'false'  |
+    '(' <EXP> ')'
 ```

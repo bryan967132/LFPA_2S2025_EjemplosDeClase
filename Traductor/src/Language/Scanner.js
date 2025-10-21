@@ -260,7 +260,7 @@ export default class Scanner {
      * @returns {Token} Token reconocido.
      */
     #S3() {
-        return { lexeme: this.#buffer.substring(1, this.#buffer.length - 1), type: 'TK_str', line: this.#char_line, column: this.#char_col }; // Cadena
+        return { lexeme: this.#buffer, type: 'TK_str', line: this.#char_line, column: this.#char_col }; // Cadena
     }
 
     /**
@@ -295,7 +295,7 @@ export default class Scanner {
      * @returns {Token} Token reconocido.
      */
     #S6() {
-        return { lexeme: this.#buffer.substring(1, this.#buffer.length - 1), type: 'TK_char', line: this.#char_line, column: this.#char_col }; // Cadena
+        return { lexeme: this.#buffer, type: 'TK_char', line: this.#char_line, column: this.#char_col }; // Cadena
     }
 
     #S7() {
@@ -522,6 +522,7 @@ export default class Scanner {
      */
     #S27() {
         return { lexeme: this.#buffer, type: 'TK_comment', line: this.#char_line, column: this.#char_col };
+        // return null;
     }
 
     /**
@@ -536,6 +537,7 @@ export default class Scanner {
         this.#char_line ++;
         this.#char_col = 1;
         return { lexeme: this.#buffer, type: 'TK_single_comment', line: this.#char_line, column: this.#char_col };
+        // return null;
     }
 
     /**

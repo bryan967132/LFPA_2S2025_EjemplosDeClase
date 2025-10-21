@@ -1,5 +1,16 @@
 import { errors } from "../Utils/Errors.js";
 import Scanner from "./Scanner.js";
+import Type from "../Interpreter/Utils/Type.js";
+// Expresiones
+import AccesVar from "../Interpreter/Expressions/AccessVar.js";
+import Arithmetic from "../Interpreter/Expressions/Arithmetic.js";
+import Primitive from "../Interpreter/Expressions/Primitive.js";
+import Relational from "../Interpreter/Expressions/Relational.js";
+// Instrucciones
+import Block from "../Interpreter/Instructions/Block.js";
+import InitVar from "../Interpreter/Instructions/InitVar.js";
+import MainFunc from "../Interpreter/Instructions/MainFunc.js";
+import Print from "../Interpreter/Instructions/Print.js";
 
 /**
  * @typedef {Object} Token
@@ -26,7 +37,7 @@ export default class Parser {
     }
 
     parse() {
-        this.#START();
+        return this.#START();
     }
 
     #START() {
@@ -35,7 +46,7 @@ export default class Parser {
             this.#consume(this.#current_token.type);
         }
 
-        this.#MAINFUNCTION();
+        let f = this.#MAINFUNCTION();
 
         while(!this.#match('EOF')) {
             this.#consume(this.#current_token.type);
@@ -47,15 +58,19 @@ export default class Parser {
         }
 
         this.#consume('EOF');
+
+        return f;
     }
 
     #MAINFUNCTION() {
         // <MAINFUNCTION> ::= 'int' 'main' '(' ')' '{' <INSTRUCTION>* 'return' TK_int ';' '}'
-        this.#consume('KW_int');
+        let i = this.#consume('KW_int');
         this.#consume('KW_main');
         this.#consume('TK_lpar');
         this.#consume('TK_rpar');
         this.#consume('TK_lbrc');
+
+        let instructions = [];
 
         while(this.#match(
             'KW_int', 'KW_float', 'KW_Str', 'KW_char', 'KW_bool',
@@ -63,9 +78,11 @@ export default class Parser {
             'TK_comment', 'TK_single_comment' // comentarios
         )) {
             if(!this.#match('TK_comment', 'TK_single_comment')) {
-                this.#INSTRUCTION();
+                let ins = this.#INSTRUCTION();
+                instructions.push(ins);
             } else {
-                this.#consume('TK_comment', 'TK_single_comment')
+                let comm = this.#consume('TK_comment', 'TK_single_comment');
+                instructions.push(comm);
             }
         }
 
@@ -73,27 +90,39 @@ export default class Parser {
         this.#consume('TK_int');
         this.#consume('TK_semicolon');
         this.#consume('TK_rbrc');
+
+        return new MainFunc(i.line, i.column, instructions);
     }
 
     #INITVAR() {
         // <INITVAR> ::= <TYPE> TK_id ('=' <EXP>)? (',' TK_id ('=' <EXP>)?)* ';'
-        this.#TYPE();
-        this.#consume('TK_id');
+        let inits = [];
+
+        let t = this.#TYPE();
+        let id = this.#consume('TK_id');
+        let v = null;
+
         if(this.#match('TK_assign')) {
             this.#consume('TK_assign');
-            this.#EXP();
+            v = this.#EXP();
         }
+
+        inits.push({ id: id.lexeme, type: t, value: v });
 
         while(this.#match('TK_comma')) {
             this.#consume('TK_comma');
-            this.#consume('TK_id');
+            id = this.#consume('TK_id');
+            v = null;
             if(this.#match('TK_assign')) {
                 this.#consume('TK_assign');
-                this.#EXP();
+                v = this.#EXP();
             }
+
+            inits.push({ id: id.lexeme, type: t, value: v });
         }
 
         this.#consume('TK_semicolon');
+        return new InitVar(id.line, id.column, inits);
     }
 
     #ASSIGNVAR() {
@@ -150,7 +179,9 @@ export default class Parser {
 
     #BLOCK() {
         // <BLOCK> ::= '{' <INSTRUCTION>* '}'
-        this.#consume('TK_lbrc');
+        let l = this.#consume('TK_lbrc');
+
+        let instructions = [];
 
         while(this.#match(
             'KW_int', 'KW_float', 'KW_Str', 'KW_char', 'KW_bool',
@@ -158,56 +189,56 @@ export default class Parser {
             'TK_comment', 'TK_single_comment' // comentarios
         )) {
             if(!this.#match('TK_comment', 'TK_single_comment')) {
-                this.#INSTRUCTION();
+                let ins = this.#INSTRUCTION();
+                instructions.push(ins);
             } else {
-                this.#consume('TK_comment', 'TK_single_comment')
+                let comm = this.#consume('TK_comment', 'TK_single_comment')
+                instructions.push(comm);
             }
         }
 
         this.#consume('TK_rbrc');
+
+        return new Block(l.line, l.column, instructions);
     }
 
     #INSTRUCTION() {
         // <INSTRUCTION> ::= <INITIVAR>
         if(this.#match('KW_int', 'KW_float', 'KW_Str', 'KW_char', 'KW_bool')) {
-            this.#INITVAR();
-            return;
+            return this.#INITVAR();
         }
         // <INSTRUCTION> ::= <ASSIGNVAR>
         if(this.#match('TK_id')) {
-            this.#ASSIGNVAR();
-            return;
+            return this.#ASSIGNVAR();
         }
         // <INSTRUCTION> ::= <IF>
         if(this.#match('KW_if')) {
-            this.#IF();
-            return;
+            return this.#IF();
         }
         // <INSTRUCTION> ::= <FOR>
         if(this.#match('KW_for')) {
-            this.#FOR();
-            return;
+            return this.#FOR();
         }
         // <INSTRUCTION> ::= <WHILE>
         if(this.#match('KW_while')) {
-            this.#WHILE();
-            return;
+            return this.#WHILE();
         }
         // <INSTRUCTION> ::= <PRINT>
         if(this.#match('KW_cout')) {
-            this.#PRINT();
-            return;
+            return this.#PRINT();
         }
+        return null;
     }
 
     #PRINT() {
         // <PRINT> ::= 'cout' '>>' <EXP> '>>' 'endl' ';'
-        this.#consume('KW_cout');
+        let l = this.#consume('KW_cout');
         this.#consume('TK_arrow');
-        this.#EXP();
+        let e = this.#EXP();
         this.#consume('TK_arrow');
         this.#consume('KW_endl');
         this.#consume('TK_semicolon');
+        return new Print(l.line, l.column, e);
     }
 
     #TYPE() {
@@ -219,37 +250,61 @@ export default class Parser {
             'char'  |
             'bool'
         */
-        this.#consume('KW_int', 'KW_float', 'KW_Str', 'KW_char', 'KW_bool');
+        let t = this.#consume('KW_int', 'KW_float', 'KW_Str', 'KW_char', 'KW_bool');
+        if(t.type === 'KW_int') {
+            return Type.INT;
+        }
+        if(t.type === 'KW_float') {
+            return Type.FLOAT;
+        }
+        if(t.type === 'KW_Str') {
+            return Type.STRING;
+        }
+        if(t.type === 'KW_char') {
+            return Type.CHAR;
+        }
+        if(t.type === 'KW_bool') {
+            return Type.BOOLEAN;
+        }
     }
 
     #EXP() {
         // <EXP> ::= <EXP2> (('==' | '!=' | '<=' | '>=' | '<' | '>') <EXP2>)*
-        this.#EXP2();
+        let e1 = this.#EXP2();
 
         while(this.#match('TK_equal', 'TK_notequal', 'TK_grtequal', 'TK_lsequal', 'TK_greater', 'TK_less')) {
-            this.#consume('TK_equal', 'TK_notequal', 'TK_grtequal', 'TK_lsequal', 'TK_greater', 'TK_less');
-            this.#EXP2();
+            let s = this.#consume('TK_equal', 'TK_notequal', 'TK_grtequal', 'TK_lsequal', 'TK_greater', 'TK_less');
+            let e2 = this.#EXP2();
+            e1 = new Relational(e1.line, e1.column, e1, s.lexeme, e2);
         }
+
+        return e1;
     }
 
     #EXP2() {
         // <EXP2> ::= <EXP1> (('+' | '-') <EXP1>)*
-        this.#EXP1();
+        let e1 = this.#EXP1();
 
         while(this.#match('TK_add', 'TK_sub')) {
-            this.#consume('TK_add', 'TK_sub');
-            this.#EXP1();
+            let s = this.#consume('TK_add', 'TK_sub');
+            let e2 = this.#EXP1();
+            e1 = new Arithmetic(e1.line, e1.column, e1, s.lexeme, e2);
         }
+
+        return e1;
     }
 
     #EXP1() {
         // <EXP1> ::= <PRIMITIVE> (('*' | '/') <PRIMITIVE>)*
-        this.#PRIMITIVE();
+        let e1 = this.#PRIMITIVE();
 
         while(this.#match('TK_mul', 'TK_div')) {
-            this.#consume('TK_mul', 'TK_div');
-            this.#PRIMITIVE();
+            let s = this.#consume('TK_mul', 'TK_div');
+            let e2 = this.#PRIMITIVE();
+            e1 = new Arithmetic(e1.line, e1.column, e1, s.lexeme, e2);
         }
+
+        return e1;
     }
 
     #PRIMITIVE() {
@@ -261,9 +316,47 @@ export default class Parser {
             TK_str   |
             TK_char  |
             'true'   |
-            'false'
+            'false'  |
+            '(' <EXP> ')'
         */
-        this.#consume('TK_id', 'TK_int', 'TK_float', 'TK_str', 'TK_char', 'KW_true', 'KW_false');
+
+        if(this.#match('TK_id', 'TK_int', 'TK_float', 'TK_str', 'TK_char', 'KW_true', 'KW_false')) {
+            let p = this.#consume('TK_id', 'TK_int', 'TK_float', 'TK_str', 'TK_char', 'KW_true', 'KW_false');
+            if(p) {
+                if(p.type === 'TK_id') {
+                    return new AccesVar(p.line, p.column, p.lexeme);
+                }
+                if(p.type === 'TK_int') {
+                    return new Primitive(p.line, p.column, p.lexeme, Type.INT);
+                }
+                if(p.type === 'TK_float') {
+                    return new Primitive(p.line, p.column, p.lexeme, Type.FLOAT);
+                }
+                if(p.type === 'TK_str') {
+                    return new Primitive(p.line, p.column, p.lexeme, Type.STRING);
+                }
+                if(p.type === 'TK_char') {
+                    return new Primitive(p.line, p.column, p.lexeme, Type.CHAR);
+                }
+                if(p.type === 'KW_true' || p.type === 'KW_false') {
+                    return new Primitive(p.line, p.column, p.lexeme, Type.BOOLEAN);
+                }
+            }
+        }
+        if(this.#match('TK_lpar')) {
+            let p = this.#consume('TK_lpar');
+            let v = this.#EXP();
+            this.#consume('TK_rpar');
+
+            return {
+                line: p.line,
+                column: p.column,
+                traducir: () => {
+                    let value = v.traducir();
+                    return {value: `(${value})`, type: value.type};
+                }
+            };
+        }
     }
 
     /**

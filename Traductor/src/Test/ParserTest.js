@@ -1,7 +1,9 @@
 import IO from "../Utils/IO/IO.js";
 import Scanner from "../Language/Scanner.js";
 import Parser from "../Language/Parser.js";
+import GenGo from "../Interpreter/Generator/GenGo.js";
 import { errors } from "../Utils/Errors.js";
+import Env from "../Interpreter/Generator/Env.js";
 
 const io = new IO();
 
@@ -25,7 +27,14 @@ console.log("===============");
 const scanner = new Scanner(input);
 const parser = new Parser(scanner);
 
-parser.parse();
+const mainFunc = parser.parse();
+const env = new Env(null, "Global");
+const gen = new GenGo();
+
+mainFunc.traducir(env, gen);
+
+const generatedCode = gen.getCode();
+console.log(generatedCode);
 
 console.log("\n\x1b[31mERRORS\x1b[0m");
 console.table(errors)
